@@ -2,34 +2,69 @@
   <head>
     <style>
       html, body {
-        margin: 0;
-        padding: 0;
         height: 100%;
         width: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: 'Roboto', sans-serif;
       }
 
-      input {
-        display: block;
+      #wrapper {
+        height: 100%;
       }
     </style>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
   </head>
   <body onload="init()">
-    <h1 id="today"></h1>
-    <form id="calcTime">
-      <label for="start">Start</label>
-      <input id="start" type="time">
-      <label for="stop">Stop</label>
-      <input id="stop" type="time">
-      <input type="submit">
-    </form>
-    <table id="log">
-      <tr>
-        <th>Start</th>
-        <th>Stop</th>
-        <th>Time</th>
-      </tr>
-    </table>
-    <h2 id="totalTime"></h2>
+    <div id="wrapper" class="container d-flex align-items-center justify-content-center">
+      <div class="row">
+        <div class="col">
+          <div class="row">
+            <div class="col">
+              <h1 id="today"></h1>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              <form id="calcTime">
+                <div class="form-row">
+                  <div class="col">
+                    <label for="start">Start</label>
+                    <input id="start" class="form-control" type="time">
+                  </div>
+                  <div class="col">
+                    <label for="stop">Stop</label>
+                    <input id="stop" class="form-control" type="time">
+                  </div>
+                  <div class="col">
+                    <label for="submit" class="invisible">Add</label>
+                    <input type="submit" class="form-control btn btn-primary" value="Add">
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div class="row mt-3">
+            <div class="col">
+              <table id="log" class="table">
+                <tr>
+                  <th>Start</th>
+                  <th>Stop</th>
+                  <th>Time</th>
+                </tr>
+              </table>
+            </div>
+          </div>
+          <div class="row mt-3">
+            <div class="col">
+              <h2 id="totalTime"></h2>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script>
       const FORM = document.getElementById("calcTime");
