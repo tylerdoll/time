@@ -1,0 +1,68 @@
+<html>
+  <head>
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+      }
+
+      input {
+        display: block;
+      }
+    </style>
+  </head>
+  <body onload="init()">
+    <form id="calcTime">
+      <label for="start">Start</label>
+      <input id="start" type="time">
+      <label for="stop">Stop</label>
+      <input id="stop" type="time">
+      <input type="submit">
+    </form>
+    <div id="log"></div>
+    <h1 id="totalTime"></h1>
+
+    <script>
+      const FORM = document.getElementById("calcTime");
+      const START_INPUT = document.getElementById("start");
+      const STOP_INPUT = document.getElementById("stop");
+      const LOG = document.getElementById("log");
+
+      let totalTime = 0;
+
+      function init() {
+        updateTotalTime(0);
+      }
+
+      function calcTime(start, stop) {
+        return Math.round(Math.abs(stop - start) / (60 * 60 * 1000) * 10) / 10;
+      }
+
+      function updateTotalTime(time) {
+        totalTime += time;
+        document.getElementById("totalTime").textContent = `Total Time: ${totalTime}`;
+      }
+
+      function updateLog(time) {
+        const entry = document.createElement("div");
+        entry.textContent = time;
+        LOG.appendChild(entry);
+      }
+
+      FORM.addEventListener("submit", e => {
+        e.preventDefault();
+
+        const timeWorked = calcTime(START_INPUT.valueAsNumber, STOP_INPUT.valueAsNumber);
+        updateLog(timeWorked);
+        updateTotalTime(timeWorked);
+
+        FORM.reset();
+        START_INPUT.focus();
+
+        return true;
+      });
+    </script>
+  </body>
+</html>
