@@ -14,6 +14,7 @@
     </style>
   </head>
   <body onload="init()">
+    <h1 id="today"></h1>
     <form id="calcTime">
       <label for="start">Start</label>
       <input id="start" type="time">
@@ -40,6 +41,7 @@
 
       function init() {
         updateTotalTime(0);
+        document.getElementById("today").textContent = new Date().toDateString();
       }
 
       function calcTime(start, stop) {
