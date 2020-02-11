@@ -11,7 +11,7 @@
   }
 
   function calcTime(start, stop) {
-    return Math.round(Math.abs(stop - start) / (60 * 60 * 1000) * 10) / 10;
+    return Math.ceil(Math.abs(stop - start) / (60 * 60 * 1000) * 10) / 10;
   }
 
   function updateTotalTime(time) {
