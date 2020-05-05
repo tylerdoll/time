@@ -1,6 +1,7 @@
   const FORM = document.getElementById("calcTime");
   const START_INPUT = document.getElementById("start");
   const STOP_INPUT = document.getElementById("stop");
+  const COMMENT_INPUT = document.getElementById("comment");
   const LOG = document.getElementById("log");
 
   let totalTime = 0;
@@ -20,19 +21,22 @@
 
   }
 
-  function updateLog(start, stop, time) {
+  function updateLog(start, stop, time, comment) {
     const entry = document.createElement("tr");
     const startTd = document.createElement("td")
     const stopTd = document.createElement("td");
     const timeTd = document.createElement("td");
+    const commentTd = document.createElement("td");
 
     startTd.textContent = start;
     stopTd.textContent = stop;
     timeTd.textContent = time;
+    commentTd.textContent = comment;
 
     entry.appendChild(startTd)
     entry.appendChild(stopTd)
     entry.appendChild(timeTd)
+    entry.appendChild(commentTd)
     LOG.appendChild(entry);
   }
 
@@ -47,7 +51,8 @@
     updateLog(
       START_INPUT.value,
       STOP_INPUT.value,
-      timeWorked
+      timeWorked,
+      COMMENT_INPUT.value
     );
     updateTotalTime(timeWorked);
 
