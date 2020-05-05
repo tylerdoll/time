@@ -43,10 +43,14 @@
   FORM.addEventListener("submit", e => {
     e.preventDefault();
 
-    const timeWorked = calcTime(
-      START_INPUT.valueAsNumber,
-      STOP_INPUT.valueAsNumber
-    );
+    const startTime = START_INPUT.valueAsNumber;
+    const stopTime = STOP_INPUT.valueAsNumber;
+
+    if (isNaN(startTime) || isNaN(stopTime)) {
+      return;
+    }
+
+    const timeWorked = calcTime(startTime, stopTime);
 
     updateLog(
       START_INPUT.value,
