@@ -23,8 +23,7 @@ function formatTime(time) {
 
 function updateTotalTime(time) {
   totalTime += time;
-  document.getElementById("totalTime").textContent = `Total Time: ${formatTime(time)}`;
-
+  document.getElementById("totalTime").textContent = `Total Time: ${formatTime(totalTime)}`;
 }
 
 function updateTimeByComment(time, comment) {
