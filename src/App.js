@@ -1,25 +1,23 @@
 import React, { useState } from 'react';
 
-import { makeStyles } from '@material-ui/core/styles';
 import { Container } from '@material-ui/core';
 import { Grid } from '@material-ui/core';
-import { Typography } from '@material-ui/core';
-import { Button, TextField } from '@material-ui/core';
-import { AppBar, Toolbar } from '@material-ui/core';
+import { Button } from '@material-ui/core';
 
-import { Refresh, Add } from '@material-ui/icons';
 
-import Log from "./Log";
-import Groups from "./Groups";
+import AppBar from "./components/AppBar";
+import Log from "./components/Log";
+import Groups from "./components/Groups";
+import TimeForm from "./components/TimeForm";
 
-const useStyles = makeStyles({
-  appbar: {
-    marginBottom: 64,
-  },
-  title: {
-    flexGrow: 1,
-  },
-});
+const defaultState = {
+  startTime: null,
+  stopTime: "",
+  name: "",
+  entries: [],
+  totalTime: 0,
+  date: new Date().toDateString(),
+};
 
 function msToTime(ms) {
   let hrs = ms / 1000 / 60 / 60;
@@ -32,45 +30,22 @@ function msToTime(ms) {
   return `${hrs}:${mins} ${m}`;
 }
 
-function renderRefreshButton(handleOnClick) {
-  return ( 
-    <Button
-      color="inherit"
-      startIcon={<Refresh/>}
-      onClick={handleOnClick}
-    >
-      Reset
-    </Button>
-  );
-};
-
 function App() {
-  const defaultState = {
-    startTime: null,
-    stopTime: "",
-    name: "",
-    entries: [],
-    totalTime: 0,
-    date: new Date().toDateString(),
-  };
   const [state, setState] = useState(defaultState);
-
   const { startTime, stopTime, name, entries, totalTime, date } = state;
-
-  const classes = useStyles();
 
   let groupedEntries = entries.reduce((groups, entry) => {
     const idx = groups.findIndex((elem) => elem.name === entry.name);
     if (idx === -1) {
-      const {name, time} = entry;
-      groups.push({name, time});
+      const { name, time } = entry;
+      groups.push({ name, time });
     } else {
       groups[idx].time += entry.time;
     }
     return groups;
   }, []);
 
-  const handleAddTime = () => {
+  const handleAddTimeClick = () => {
     if (!startTime || !stopTime || isNaN(startTime) || isNaN(stopTime)) {
       return;
     }
@@ -91,7 +66,6 @@ function App() {
       totalTime: totalTime + time,
     });
   }
-
   const handleDeleteTime = (id) => {
     if (window.confirm("Are you sure you want to delete this entry?")) {
       const newEntries = entries.filter((entry) => entry.id !== id);
@@ -103,57 +77,22 @@ function App() {
       });
     }
   };
+  const handleStartChange = (e) => setState({...state, startTime: e.target.valueAsNumber});
+  const handleStopChange = (e) => setState({...state, stopTime: e.target.valueAsNumber});
+  const handleNameChange = (e) => setState({...state, name: e.target.value});
+  const handleRefreshClick = () => setState(defaultState);
 
   return (
     <div>
-      <AppBar className={classes.appbar} position="static">
-        <Toolbar>
-          <Typography variant="h6" className={classes.title}>Time for {date}</Typography>
-          {renderRefreshButton(() => setState(defaultState))}
-        </Toolbar>
-      </AppBar>
+      <AppBar date={date} onRefreshClick={handleRefreshClick} />
 
       <Container maxWidth="md">
-        <Grid container spacing={2}>
-          <Grid item xs={3}>
-            <TextField
-              id="start"
-              label="Start"
-              type="time"
-              onChange={(e) => setState({...state, startTime: e.target.valueAsNumber})}
-              InputLabelProps={{
-                shrink: true,
-              }}
-            />
-          </Grid>
-          <Grid item xs={3}>
-            <TextField
-              id="stop"
-              label="Stop"
-              type="time"
-              onChange={(e) => setState({...state, stopTime: e.target.valueAsNumber})}
-              InputLabelProps={{
-                shrink: true,
-              }}
-            />
-          </Grid>
-          <Grid item xs={3}>
-            <TextField
-              id="name"
-              label="Name"
-              onChange={(e) => setState({...state, name: e.target.value})}
-            />
-          </Grid>
-          <Grid item xs={3}>
-            <Button
-              color="primary"
-              variant="contained"
-              startIcon={<Add/>}
-              onClick={handleAddTime}>
-              Add
-            </Button>
-          </Grid>
-        </Grid>
+        <TimeForm
+          onStartChange={handleStartChange}
+          onStopChange={handleStopChange}
+          onNameChange={handleNameChange}
+          onAddTimeClick={handleAddTimeClick}
+        />
 
         <Grid container spacing={3}>
           <Grid item md={6}>
@@ -161,7 +100,7 @@ function App() {
             <h2>Total Time: {totalTime.toFixed(1)}</h2>
           </Grid>
           <Grid item md={6}>
-            <Log rows={entries} onDelete={handleDeleteTime}/>
+            <Log rows={entries} onDelete={handleDeleteTime} />
           </Grid>
         </Grid>
 
