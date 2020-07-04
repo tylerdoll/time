@@ -2,15 +2,16 @@ import React, { useState } from 'react';
 
 import { Container } from '@material-ui/core';
 import { Grid } from '@material-ui/core';
-import { Button } from '@material-ui/core';
-
 
 import AppBar from "./components/AppBar";
 import Log from "./components/Log";
 import Groups from "./components/Groups";
 import TimeForm from "./components/TimeForm";
 
+import { saveSession } from "./session.js";
+
 const defaultState = {
+  id: "test",
   startTime: null,
   stopTime: "",
   name: "",
@@ -32,6 +33,10 @@ function msToTime(ms) {
 
 function App() {
   const [state, setState] = useState(defaultState);
+  const saveState = (state) => { 
+    saveSession(state);
+    setState(state);
+  };
   const { startTime, stopTime, name, entries, totalTime, date } = state;
 
   let groupedEntries = entries.reduce((groups, entry) => {
@@ -51,7 +56,7 @@ function App() {
     }
 
     const time = Math.ceil(Math.abs(stopTime - startTime) / (60 * 60 * 1000) * 10) / 10;
-    setState({
+    saveState({
       ...state,
       entries: [
         ...entries,
@@ -70,17 +75,17 @@ function App() {
     if (window.confirm("Are you sure you want to delete this entry?")) {
       const newEntries = entries.filter((entry) => entry.id !== id);
       const newTotalTime = newEntries.reduce((total, entry) => total + entry.time, 0);
-      setState({
+      saveState({
         ...state,
         entries: newEntries,
         totalTime: newTotalTime,
       });
     }
   };
-  const handleStartChange = (e) => setState({...state, startTime: e.target.valueAsNumber});
-  const handleStopChange = (e) => setState({...state, stopTime: e.target.valueAsNumber});
-  const handleNameChange = (e) => setState({...state, name: e.target.value});
-  const handleRefreshClick = () => setState(defaultState);
+  const handleStartChange = (e) => saveState({...state, startTime: e.target.valueAsNumber});
+  const handleStopChange = (e) => saveState({...state, stopTime: e.target.valueAsNumber});
+  const handleNameChange = (e) => saveState({...state, name: e.target.value});
+  const handleRefreshClick = () => saveState(defaultState);
 
   return (
     <div>
