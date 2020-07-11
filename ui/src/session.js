@@ -1,6 +1,11 @@
 export default class WebSocketAPI {
+  constructor(handleOnMessage, handleOnDisconnect) {
+    this.handleOnMessage = handleOnMessage;
+    this.handleOnDisconnect = handleOnDisconnect;
+    this.createSocket();
+  }
 
-  constructor(handleOnMessage) {
+  createSocket() {
     const url = 'wss://qufgkhoacj.execute-api.us-east-2.amazonaws.com/Prod';
     const ws = new WebSocket(url);
     ws.onopen = (event) => {
@@ -8,14 +13,13 @@ export default class WebSocketAPI {
       this.getSession();
     }
     ws.onclose = () => {
-      console.log("Disconnected from web socket");
-      alert("Warning: Disconnected from web socket");
+      console.log("Disconnected from web socket. Reconnecting.");
+      this.createSocket();
     }
     ws.onmessage = (event) => {
       console.log("Got message from web socket", event);
-      handleOnMessage(JSON.parse(event.data));
+      this.handleOnMessage(JSON.parse(event.data));
     }
-
     this.ws = ws;
   }
 
