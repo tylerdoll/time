@@ -50,7 +50,9 @@ function groupEntries(entries) {
 }
 
 function App() {
+  //****************************************************************************
   // State
+  //****************************************************************************
   const [loaded, setLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
   const [socket, setSocket] = useState(null);
@@ -64,7 +66,9 @@ function App() {
     setSession(session);
   };
 
+  //****************************************************************************
   // Web Socket
+  //****************************************************************************
   const onGetSession = (savedSession) => {
     console.log("Setting session", savedSession);
     setLoaded(true);
@@ -80,7 +84,9 @@ function App() {
     }
   }, [socket]);
   
+  //****************************************************************************
   // Event handlers
+  //****************************************************************************
   const handleAddTimeClick = () => {
     if (!startTime || !stopTime || isNaN(startTime) || isNaN(stopTime)) {
       console.log("Not adding time");
@@ -129,7 +135,9 @@ function App() {
     setEntryToDelete(entryId);
   }
 
+  //****************************************************************************
   // Render
+  //****************************************************************************
   const classes = useStyles();
   return (
     <div>
