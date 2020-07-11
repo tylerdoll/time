@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { Container } from '@material-ui/core';
 import { Grid } from '@material-ui/core';
+import { Box } from '@material-ui/core';
 import { CircularProgress } from '@material-ui/core';
 import { Grow, Fade } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
@@ -11,11 +12,11 @@ import Log from "./components/Log";
 import Groups from "./components/Groups";
 import TimeForm from "./components/TimeForm";
 
-import { saveSession, getSession } from "./session.js";
+import WebSocketAPI from "./session.js";
 
-const defaultState = {
-  id: "test",
-  startTime: null,
+const defaultSession = {
+  id: "default",
+  startTime: "",
   stopTime: "",
   name: "",
   entries: [],
@@ -33,24 +34,25 @@ const useStyles = makeStyles({
 
 function msToTime(ms) {
   let hrs = ms / 1000 / 60 / 60;
-  let mins = Math.floor(hrs % 1 * 60);
-  const m = hrs < 12 ? "AM" : "PM";
+  let mins = Math.floor((hrs % 1) * 60);
 
   hrs = Math.floor(hrs);
   hrs = hrs < 10 ? "0" + hrs.toString() : hrs;
   mins = mins < 10 ? "0" + mins.toString() : mins;
-  return `${hrs}:${mins} ${m}`;
+  return `${hrs}:${mins}`;
 }
 
+let ws = null;
+
 function App() {
-  const [state, setState] = useState(defaultState);
+  const [session, setSession] = useState(defaultSession);
   const [loaded, setLoaded] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const saveState = (state) => { 
-    saveSession(state);
-    setState(state);
+  const [loading, setLoading] = useState(false);
+  const saveSession = (session) => { 
+    ws.sendMessage(session);
+    setSession(session);
   };
-  const { startTime, stopTime, name, entries, totalTime, date } = state;
+  const { startTime, stopTime, name, entries, totalTime, date } = session;
 
   const classes = useStyles();
 
@@ -65,32 +67,31 @@ function App() {
     return groups;
   }, []);
 
-  const loadSession = (id="test") => {
-    setIsLoading(true);
-    getSession(id).then(savedState => {
-      console.log("Got saved state", savedState);
-      setLoaded(true);
-      setIsLoading(false);
-      setState(savedState || defaultState);
-    });
+  const onGetSession = (savedSession) => {
+    console.log("Setting session", savedSession);
+    setLoaded(true);
+    setLoading(false);
+    const newSession = savedSession || defaultSession;
+    setSession(newSession);
+    console.log("Set session", newSession);
   };
   useEffect(() => {
-    if (!loaded && !isLoading) loadSession();
-    const interval = setInterval(() => {
-      console.log("Refreshing session");
-      loadSession()
-    }, 1 * 60 * 1000);
-    return () => clearInterval(interval);
-  });
+    if (!ws) {
+      setLoading(true);
+      ws = new WebSocketAPI(onGetSession);
+    }
+  }, []);
+  
 
   const handleAddTimeClick = () => {
     if (!startTime || !stopTime || isNaN(startTime) || isNaN(stopTime)) {
+      console.log("Not adding time");
       return;
     }
 
     const time = Math.ceil(Math.abs(stopTime - startTime) / (60 * 60 * 1000) * 10) / 10;
-    saveState({
-      ...state,
+    saveSession({
+      ...session,
       entries: [
         ...entries,
         {
@@ -108,29 +109,33 @@ function App() {
     if (window.confirm("Are you sure you want to delete this entry?")) {
       const newEntries = entries.filter((entry) => entry.id !== id);
       const newTotalTime = newEntries.reduce((total, entry) => total + entry.time, 0);
-      saveState({
-        ...state,
+      saveSession({
+        ...session,
         entries: newEntries,
         totalTime: newTotalTime,
       });
     }
   };
-  const handleStartChange = (e) => saveState({...state, startTime: e.target.valueAsNumber});
-  const handleStopChange = (e) => saveState({...state, stopTime: e.target.valueAsNumber});
-  const handleNameChange = (e) => saveState({...state, name: e.target.value});
-  const handleRefreshClick = () => saveState(defaultState);
+  const handleStartChange = (e) => saveSession({...session, startTime: e.target.valueAsNumber});
+  const handleStopChange = (e) => saveSession({...session, stopTime: e.target.valueAsNumber});
+  const handleNameChange = (e) => saveSession({...session, name: e.target.value});
+  const handleRefreshClick = () => saveSession(defaultSession);
 
   return (
     <div>
       <AppBar date={date} onRefreshClick={handleRefreshClick} />
+
+      <Fade in={loading} unmountOnExit={true}>
+       <CircularProgress className={classes.loadingIndicator} />
+      </Fade>
 
       <Container maxWidth="md">
         <Grow in={loaded}>
           <div>
             <h2>Add Time</h2>
             <TimeForm
-              start={startTime}
-              stop={stopTime}
+              start={msToTime(startTime)}
+              stop={msToTime(stopTime)}
               name={name}
               onStartChange={handleStartChange}
               onStopChange={handleStopChange}

@@ -1,30 +1,40 @@
-const API = "https://d45akk6q5h.execute-api.us-east-2.amazonaws.com/session";
+export default class WebSocketAPI {
 
-export async function createSession(state) {
-  const response = await fetch(API, {
-    method: "POST",
-    mode: "cors",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(state)
-  });
-  return response.json();
-}
+  constructor(handleOnMessage) {
+    const url = 'wss://qufgkhoacj.execute-api.us-east-2.amazonaws.com/Prod';
+    const ws = new WebSocket(url);
+    ws.onopen = (event) => {
+      console.log("Connected to web socket", event);
+      this.getSession();
+    }
+    ws.onclose = () => {
+      console.log("Disconnected from web socket");
+      alert("Warning: Disconnected from web socket");
+    }
+    ws.onmessage = (event) => {
+      console.log("Got message from web socket", event);
+      handleOnMessage(JSON.parse(event.data));
+    }
 
-export async function saveSession(state) {
-  const response = await fetch(API, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(state)
-  });
-  return response.json();
-}
+    this.ws = ws;
+  }
 
-export async function getSession(id) {
-  const url = API + "?id=" + id;
-  const response = await fetch(url);
-  return response.json();
+  getSession(id='default') {
+    console.log("Sending request to get session");
+    const payload = {
+      action: 'getsession',
+      id
+    }
+    this.ws.send(JSON.stringify(payload));
+  }
+
+  sendMessage(data) {
+    const payload = JSON.stringify({
+      action: 'sendmessage',
+      data
+    });
+    console.log("Sending message", payload);
+    this.ws.send(payload);
+  }
+
 }
