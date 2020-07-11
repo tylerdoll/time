@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 
 import { Container } from '@material-ui/core';
 import { Grid } from '@material-ui/core';
-import { Box } from '@material-ui/core';
 import { CircularProgress } from '@material-ui/core';
 import { Grow, Fade } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
@@ -13,6 +12,7 @@ import Groups from "./components/Groups";
 import TimeForm from "./components/TimeForm";
 
 import WebSocketAPI from "./session.js";
+import {getCurrentTimeMs, msToTime} from "./time.js";
 
 const defaultSession = {
   id: "default",
@@ -32,37 +32,7 @@ const useStyles = makeStyles({
   },
 });
 
-function getCurrentTimeMs() {
-  const date = new Date();
-  const minutes = (date.getHours() * 60) + date.getMinutes();
-  const ms = minutes * 60 * 1000;
-  return ms;
-}
-
-function msToTime(ms) {
-  let hrs = ms / 1000 / 60 / 60;
-  let mins = Math.floor((hrs % 1) * 60);
-
-  hrs = Math.floor(hrs);
-  hrs = hrs < 10 ? "0" + hrs.toString() : hrs;
-  mins = mins < 10 ? "0" + mins.toString() : mins;
-  return `${hrs}:${mins}`;
-}
-
-let ws = null;
-
-function App() {
-  const [session, setSession] = useState(defaultSession);
-  const [loaded, setLoaded] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const saveSession = (session) => { 
-    ws.sendMessage(session);
-    setSession(session);
-  };
-  const { startTime, stopTime, name, entries, totalTime, date } = session;
-
-  const classes = useStyles();
-
+function groupEntries(entries) {
   let groupedEntries = entries.reduce((groups, entry) => {
     const idx = groups.findIndex((elem) => elem.name === entry.name);
     if (idx === -1) {
@@ -73,7 +43,23 @@ function App() {
     }
     return groups;
   }, []);
+  return groupedEntries;
+}
 
+function App() {
+  // State
+  const [loaded, setLoaded] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [socket, setSocket] = useState(null);
+  const [session, setSession] = useState(defaultSession);
+  const { startTime, stopTime, name, entries, totalTime, date } = session;
+  const groupedEntries = groupEntries(entries);
+  const saveSession = (session) => { 
+    socket.sendMessage(session);
+    setSession(session);
+  };
+
+  // Web Socket
   const onGetSession = (savedSession) => {
     console.log("Setting session", savedSession);
     setLoaded(true);
@@ -83,13 +69,13 @@ function App() {
     console.log("Set session", newSession);
   };
   useEffect(() => {
-    if (!ws) {
+    if (!socket) {
       setLoading(true);
-      ws = new WebSocketAPI(onGetSession);
+      setSocket(new WebSocketAPI(onGetSession));
     }
-  }, []);
+  }, [socket]);
   
-
+  // Event handlers
   const handleAddTimeClick = () => {
     if (!startTime || !stopTime || isNaN(startTime) || isNaN(stopTime)) {
       console.log("Not adding time");
@@ -128,6 +114,8 @@ function App() {
   const handleNameChange = (e) => saveSession({...session, name: e.target.value});
   const handleRefreshClick = () => saveSession(defaultSession);
 
+  // Render
+  const classes = useStyles();
   return (
     <div>
       <AppBar date={date} onRefreshClick={handleRefreshClick} />
