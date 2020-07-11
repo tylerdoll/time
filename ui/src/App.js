@@ -16,8 +16,8 @@ import WebSocketAPI from "./session.js";
 
 const defaultSession = {
   id: "default",
-  startTime: "",
-  stopTime: "",
+  startTime: getCurrentTimeMs(),
+  stopTime: getCurrentTimeMs(),
   name: "",
   entries: [],
   totalTime: 0,
@@ -31,6 +31,13 @@ const useStyles = makeStyles({
     top: "50%",
   },
 });
+
+function getCurrentTimeMs() {
+  const date = new Date();
+  const minutes = (date.getHours() * 60) + date.getMinutes();
+  const ms = minutes * 60 * 1000;
+  return ms;
+}
 
 function msToTime(ms) {
   let hrs = ms / 1000 / 60 / 60;
