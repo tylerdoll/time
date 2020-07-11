@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+import { v4 as uuid4 } from 'uuid';
+
 import { Container } from '@material-ui/core';
 import { Grid } from '@material-ui/core';
 import { CircularProgress } from '@material-ui/core';
@@ -10,6 +12,7 @@ import AppBar from "./components/AppBar";
 import Log from "./components/Log";
 import Groups from "./components/Groups";
 import TimeForm from "./components/TimeForm";
+import DeleteEntryAlert from "./components/DeleteEntryAlert";
 
 import WebSocketAPI from "./session.js";
 import {getCurrentTimeMs, msToTime} from "./time.js";
@@ -51,6 +54,8 @@ function App() {
   const [loaded, setLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
   const [socket, setSocket] = useState(null);
+  const [deleteEntryAlertOpen, setDeleteEntryAlertOpen] = useState(false);
+  const [entryToDelete, setEntryToDelete] = useState(null);
   const [session, setSession] = useState(defaultSession);
   const { startTime, stopTime, name, entries, totalTime, date } = session;
   const groupedEntries = groupEntries(entries);
@@ -88,7 +93,7 @@ function App() {
       entries: [
         ...entries,
         {
-          id: entries.length,
+          id: uuid4(),
           name,
           startTime: msToTime(startTime),
           stopTime: msToTime(stopTime),
@@ -98,30 +103,45 @@ function App() {
       totalTime: totalTime + time,
     });
   }
-  const handleDeleteTime = (id) => {
-    if (window.confirm("Are you sure you want to delete this entry?")) {
-      const newEntries = entries.filter((entry) => entry.id !== id);
-      const newTotalTime = newEntries.reduce((total, entry) => total + entry.time, 0);
-      saveSession({
-        ...session,
-        entries: newEntries,
-        totalTime: newTotalTime,
-      });
-    }
+  const handleDeleteTimeConfirm = () => {
+    console.log("Deleting entry:", entryToDelete);
+    setDeleteEntryAlertOpen(false);
+    setEntryToDelete(null);
+
+    const newEntries = entries.filter((entry) => entry.id !== entryToDelete);
+    const newTotalTime = newEntries.reduce((total, entry) => total + entry.time, 0);
+    saveSession({
+      ...session,
+      entries: newEntries,
+      totalTime: newTotalTime,
+    });
   };
   const handleStartChange = (e) => saveSession({...session, startTime: e.target.valueAsNumber});
   const handleStopChange = (e) => saveSession({...session, stopTime: e.target.valueAsNumber});
   const handleNameChange = (e) => saveSession({...session, name: e.target.value});
   const handleRefreshClick = () => saveSession(defaultSession);
+  const handleDeleteEntryAlertClose = () => {
+    setDeleteEntryAlertOpen(false);
+    setEntryToDelete(null);
+  }
+  const handleOnDeleteTimeClick = (entryId) => { 
+    setDeleteEntryAlertOpen(true);
+    setEntryToDelete(entryId);
+  }
 
   // Render
   const classes = useStyles();
   return (
     <div>
       <AppBar date={date} onRefreshClick={handleRefreshClick} />
+      <DeleteEntryAlert
+        open={deleteEntryAlertOpen}
+        handleClose={handleDeleteEntryAlertClose}
+        handleOnConfirm={handleDeleteTimeConfirm}
+      />
 
       <Fade in={loading} unmountOnExit={true}>
-       <CircularProgress className={classes.loadingIndicator} />
+        <CircularProgress className={classes.loadingIndicator} />
       </Fade>
 
       <Container maxWidth="md">
@@ -154,7 +174,7 @@ function App() {
             <Grow in={loaded} timeout={1000}>
               <div>
                 <h2>Entries</h2>
-                <Log rows={entries} onDelete={handleDeleteTime} />
+                <Log rows={entries} onDelete={handleOnDeleteTimeClick} />
               </div>
             </Grow>
           </Grid>
