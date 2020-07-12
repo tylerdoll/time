@@ -1,3 +1,9 @@
+export function getTimeStr(date) {
+  return date.toLocaleTimeString([], {
+    hour: '2-digit', minute: '2-digit', hour12: false
+  });
+}
+
 export function localTimeToMinSinceMidnight(time) {
   const [hh, mm] = time.split(':');
   return parseInt(hh) * 60 + parseInt(mm);

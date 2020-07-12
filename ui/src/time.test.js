@@ -1,4 +1,12 @@
-import { calcHoursWorked, localTimeToMinSinceMidnight } from '../src/time';
+import { calcHoursWorked, getTimeStr, localTimeToMinSinceMidnight } from '../src/time';
+
+test('get local time string in hh:mm from date', () => {
+  expect(getTimeStr(new Date('January 31 1980 12:23 AM'))).toBe('00:23');
+  expect(getTimeStr(new Date('January 31 1980 12:23 PM'))).toBe('12:23');
+  expect(getTimeStr(new Date('January 31 1980 1:15 PM'))).toBe('13:15');
+  expect(getTimeStr(new Date('January 31 1980 7:00 AM'))).toBe('07:00');
+  expect(getTimeStr(new Date('January 31 1980 11:34 PM'))).toBe('23:34');
+});
 
 test('convert local time to minutes since midnight', () => {
   expect(localTimeToMinSinceMidnight('00:00')).toBe(0);

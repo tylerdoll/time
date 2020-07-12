@@ -15,13 +15,13 @@ import TimeForm from "./components/TimeForm";
 import DeleteEntryAlert from "./components/DeleteEntryAlert";
 
 import WebSocketAPI from "./session.js";
-import {calcHoursWorked} from "./time.js";
+import {calcHoursWorked, getTimeStr} from "./time.js";
 
 const now = new Date();
 const defaultSession = {
   id: "default",
-  startTime: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-  stopTime: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+  startTime: getTimeStr(now),
+  stopTime: getTimeStr(now),
   name: "",
   entries: [],
   totalTime: 0,
