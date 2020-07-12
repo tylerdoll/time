@@ -1,17 +1,19 @@
-export function getCurrentTimeMs() {
-  const date = new Date();
-  const minutes = (date.getHours() * 60) + date.getMinutes();
-  const ms = minutes * 60 * 1000;
-  return ms;
+export function localTimeToMinSinceMidnight(time) {
+  const [hh, mm] = time.split(':');
+  return parseInt(hh) * 60 + parseInt(mm);
 }
 
-export function msToTime(ms) {
-  let hrs = ms / 1000 / 60 / 60;
-  let mins = Math.floor((hrs % 1) * 60);
+export function calcHoursWorked(startTime, stopTime) {
+  const startMins = localTimeToMinSinceMidnight(startTime);
+  const stopMins = localTimeToMinSinceMidnight(stopTime);
 
-  hrs = Math.floor(hrs);
-  hrs = hrs < 10 ? "0" + hrs.toString() : hrs;
-  mins = mins < 10 ? "0" + mins.toString() : mins;
-  return `${hrs}:${mins}`;
+  let minsWorked = stopMins - startMins;
+  if (minsWorked < 0) { // Acount for working past midnight (you poor soul)
+    minsWorked = (stopMins + (24 * 60)) - startMins;
+  }
+
+  const hrsWorked = minsWorked / 60;
+  const hrsWorkedRounded = Math.ceil(hrsWorked * 10) / 10; // round to the tenths place
+
+  return hrsWorkedRounded;
 }
-

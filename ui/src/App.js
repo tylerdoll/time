@@ -15,12 +15,13 @@ import TimeForm from "./components/TimeForm";
 import DeleteEntryAlert from "./components/DeleteEntryAlert";
 
 import WebSocketAPI from "./session.js";
-import {getCurrentTimeMs, msToTime} from "./time.js";
+import {calcHoursWorked} from "./time.js";
 
+const now = new Date();
 const defaultSession = {
   id: "default",
-  startTime: getCurrentTimeMs(),
-  stopTime: getCurrentTimeMs(),
+  startTime: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+  stopTime: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
   name: "",
   entries: [],
   totalTime: 0,
@@ -88,12 +89,12 @@ function App() {
   // Event handlers
   //****************************************************************************
   const handleAddTimeClick = () => {
-    if (!startTime || !stopTime || isNaN(startTime) || isNaN(stopTime)) {
+    if (!startTime || !stopTime) {
       console.log("Not adding time");
       return;
     }
 
-    const time = Math.ceil(Math.abs(stopTime - startTime) / (60 * 60 * 1000) * 10) / 10;
+    const time = calcHoursWorked(startTime, stopTime);
     saveSession({
       ...session,
       entries: [
@@ -101,8 +102,8 @@ function App() {
         {
           id: uuid4(),
           name,
-          startTime: msToTime(startTime),
-          stopTime: msToTime(stopTime),
+          startTime,
+          stopTime,
           time,
         },
       ],
@@ -122,8 +123,8 @@ function App() {
       totalTime: newTotalTime,
     });
   };
-  const handleStartChange = (e) => saveSession({...session, startTime: e.target.valueAsNumber});
-  const handleStopChange = (e) => saveSession({...session, stopTime: e.target.valueAsNumber});
+  const handleStartChange = (e) => saveSession({...session, startTime: e.target.value});
+  const handleStopChange = (e) => saveSession({...session, stopTime: e.target.value});
   const handleNameChange = (e) => saveSession({...session, name: e.target.value});
   const handleRefreshClick = () => saveSession(defaultSession);
   const handleDeleteEntryAlertClose = () => {
@@ -157,8 +158,8 @@ function App() {
           <div>
             <h2>Add Time</h2>
             <TimeForm
-              start={msToTime(startTime)}
-              stop={msToTime(stopTime)}
+              start={startTime}
+              stop={stopTime}
               name={name}
               onStartChange={handleStartChange}
               onStopChange={handleStopChange}
