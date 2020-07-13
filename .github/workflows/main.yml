@@ -28,4 +28,4 @@ jobs:
         ftp-server: sftp://tylerdoll.com:2222/time
         ftp-username: tylerdoll
         ftp-password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ui/build
+        local-dir: build
