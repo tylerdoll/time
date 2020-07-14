@@ -3,14 +3,16 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { Table, TableBody, TableContainer, TableHead, TableRow, TableCell, Paper } from '@material-ui/core';
 
+import TaskTableEntry from './TaskTableEntry';
+
 const useStyles = makeStyles({
   root: {
     marginTop: 32,
   },
 });
 
-function Groups(props) {
-  const { rows } = props;
+export default function TaskTable(props) {
+  const { rows, onEntryDelete } = props;
   const classes = useStyles();
 
   return (
@@ -18,23 +20,17 @@ function Groups(props) {
       <Table aria-label="simple table">
         <TableHead>
           <TableRow>
+            <TableCell />
             <TableCell>Name</TableCell>
             <TableCell align="right">Time</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {rows.map((row) => (
-            <TableRow key={row.name}>
-              <TableCell component="th" scope="row">
-                {row.name}
-              </TableCell>
-              <TableCell align="right">{row.time.toFixed(1)}</TableCell>
-            </TableRow>
+            <TaskTableEntry key={row.name} row={row} onEntryDelete={onEntryDelete}/>
           ))}
         </TableBody>
       </Table>
     </TableContainer>
   );
 }
-
-export default Groups;

@@ -9,8 +9,7 @@ import { Grow, Fade } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
 import AppBar from "./components/AppBar";
-import Log from "./components/Log";
-import Groups from "./components/Groups";
+import TaskTable from "./components/TaskTable";
 import TimeForm from "./components/TimeForm";
 import DeleteEntryAlert from "./components/DeleteEntryAlert";
 
@@ -41,9 +40,10 @@ function groupEntries(entries) {
     const idx = groups.findIndex((elem) => elem.name === entry.name);
     if (idx === -1) {
       const { name, time } = entry;
-      groups.push({ name, time });
+      groups.push({ name, time, entries: [entry] });
     } else {
       groups[idx].time += entry.time;
+      groups[idx].entries.push(entry);
     }
     return groups;
   }, []);
@@ -62,6 +62,7 @@ function App() {
   const [session, setSession] = useState(defaultSession);
   const { startTime, stopTime, name, entries, totalTime, date } = session;
   const groupedEntries = groupEntries(entries);
+  console.log(groupedEntries);
   const saveSession = (session) => { 
     socket.sendMessage(session);
     setSession(session);
@@ -131,7 +132,7 @@ function App() {
     setDeleteEntryAlertOpen(false);
     setEntryToDelete(null);
   }
-  const handleOnDeleteTimeClick = (entryId) => { 
+  const handleOnDeleteTaskEntryClick = (entryId) => { 
     setDeleteEntryAlertOpen(true);
     setEntryToDelete(entryId);
   }
@@ -170,20 +171,12 @@ function App() {
         </Grow>
 
         <Grid container maxWdith="md" spacing={3}>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12}>
             <Grow in={loaded} timeout={500}>
               <div>
                 <h2>Tasks</h2>
-                <Groups rows={groupedEntries}/>
+                <TaskTable rows={groupedEntries} onEntryDelete={handleOnDeleteTaskEntryClick}/>
                 <h3>Total Time: {totalTime.toFixed(1)}</h3>
-              </div>
-            </Grow>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Grow in={loaded} timeout={1000}>
-              <div>
-                <h2>Entries</h2>
-                <Log rows={entries} onDelete={handleOnDeleteTimeClick} />
               </div>
             </Grow>
           </Grid>
