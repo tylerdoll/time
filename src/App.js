@@ -13,8 +13,8 @@ import TaskTable from "./components/TaskTable";
 import TimeForm from "./components/TimeForm";
 import DeleteEntryAlert from "./components/DeleteEntryAlert";
 
-import WebSocketAPI from "./session.js";
-import {calcHoursWorked, getTimeStr} from "./time.js";
+import WebSocketAPI from "./WebSocketApi";
+import {calcHoursWorked, getTimeStr} from "./time";
 
 const now = new Date();
 const defaultSession = {
