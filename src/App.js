@@ -60,12 +60,14 @@ function App() {
   const [deleteEntryAlertOpen, setDeleteEntryAlertOpen] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState(null);
   const [session, setSession] = useState(defaultSession);
+
   const { startTime, stopTime, name, entries, totalTime, date } = session;
   const groupedEntries = groupEntries(entries);
-  console.log(groupedEntries);
-  const saveSession = (session) => { 
-    socket.sendMessage(session);
+  const saveSession = (session) => {
+    console.log("Saving session", session);
     setSession(session);
+    socket.lazySendMessage(session);
+    console.log("Saved session", session);
   };
 
   //****************************************************************************
@@ -79,6 +81,7 @@ function App() {
     setSession(newSession);
     console.log("Set session", newSession);
   };
+
   useEffect(() => {
     if (!socket) {
       setLoading(true);
