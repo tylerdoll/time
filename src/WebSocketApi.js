@@ -14,9 +14,9 @@ const debounce = function(func, wait, immediate) {
 };
 
 export default class WebSocketAPI {
-  constructor(handleOnMessage, handleOnDisconnect) {
+  constructor(sessionId, handleOnMessage) {
+    this.sessionId = sessionId;
     this.handleOnMessage = handleOnMessage;
-    this.handleOnDisconnect = handleOnDisconnect;
     this.createSocket();
   }
 
@@ -38,11 +38,11 @@ export default class WebSocketAPI {
     this.ws = ws;
   }
 
-  getSession(id='default') {
-    console.log("Sending request to get session");
+  getSession() {
+    console.log("Sending request to get session for id", this.sessionId);
     const payload = {
       action: 'getsession',
-      id
+      sessionId: this.sessionId
     }
     this.ws.send(JSON.stringify(payload));
   }

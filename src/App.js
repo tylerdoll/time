@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from 'react';
 
+import { withAuthenticator } from '@aws-amplify/ui-react';
+import { Auth } from 'aws-amplify';
+import AmplifyTheme from './AmplifyTheme';
+
 import { v4 as uuid4 } from 'uuid';
 
 import { Container } from '@material-ui/core';
@@ -14,11 +18,11 @@ import TimeForm from "./components/TimeForm";
 import DeleteEntryAlert from "./components/DeleteEntryAlert";
 
 import WebSocketAPI from "./WebSocketApi";
-import {calcHoursWorked, getTimeStr} from "./time";
+import {calcHoursWorked, getTimeStr} from "./time"; 
+
 
 const now = new Date();
 const defaultSession = {
-  id: "default",
   startTime: getTimeStr(now),
   stopTime: getTimeStr(now),
   name: "",
@@ -54,6 +58,7 @@ function App() {
   //****************************************************************************
   // State
   //****************************************************************************
+  const [user, setUser] = useState(null);
   const [loaded, setLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
   const [socket, setSocket] = useState(null);
@@ -66,9 +71,11 @@ function App() {
   const saveSession = (session) => {
     console.log("Saving session", session);
     setSession(session);
-    socket.lazySendMessage(session);
-    console.log("Saved session", session);
+    const sessionWithId = { id: user.attributes.sub, ...session };
+    socket.lazySendMessage(sessionWithId);
+    console.log("Saved session", sessionWithId);
   };
+
 
   //****************************************************************************
   // Web Socket
@@ -84,8 +91,13 @@ function App() {
 
   useEffect(() => {
     if (!socket) {
-      setLoading(true);
-      setSocket(new WebSocketAPI(onGetSession));
+      Auth.currentAuthenticatedUser()
+      .then((user) => {
+        console.log("Got user", user);
+        setUser(user);
+        setLoading(true);
+        setSocket(new WebSocketAPI(user.attributes.sub, onGetSession));
+      });
     }
   }, [socket]);
   
@@ -189,4 +201,4 @@ function App() {
   );
 }
 
-export default App;
+export default withAuthenticator(App);

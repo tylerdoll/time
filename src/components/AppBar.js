@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { AmplifySignOut } from '@aws-amplify/ui-react';
+
 import { Typography } from '@material-ui/core';
 import { AppBar as MAppBar, Toolbar } from '@material-ui/core';
 import { Button } from '@material-ui/core';
@@ -31,6 +33,7 @@ function AppBar(props) {
           >
             Reset
           </Button>
+          <AmplifySignOut />
         </Toolbar>
       </MAppBar>
   );
