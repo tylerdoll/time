@@ -1,14 +1,25 @@
 const debounce = function(func, wait, immediate) {
+  /*
+   * Source is from https://davidwalsh.name/javascript-debounce-function
+   *
+   * The point of debounce is to limit the frequency of which a function is
+   * called.
+   */
 	let timeout;
+
 	return function() {
 		const context = this, args = arguments;
+
 		const later = function() {
 			timeout = null;
 			if (!immediate) func.apply(context, args);
 		};
+
 		const callNow = immediate && !timeout;
+
 		clearTimeout(timeout);
 		timeout = setTimeout(later, wait);
+
 		if (callNow) func.apply(context, args);
 	};
 };
@@ -21,6 +32,9 @@ export default class WebSocketAPI {
   }
 
   createSocket() {
+    /*
+     * Creates the socket and attaches event handlers.
+     */
     const url = 'wss://qufgkhoacj.execute-api.us-east-2.amazonaws.com/Prod';
     const ws = new WebSocket(url);
     ws.onopen = (event) => {
@@ -39,6 +53,12 @@ export default class WebSocketAPI {
   }
 
   getSession(id='default') {
+    /*
+     * Gets a session from the database.
+     *
+     * Args
+     *  id: ID of session to get
+     */
     console.log("Sending request to get session");
     const payload = {
       action: 'getsession',
@@ -48,6 +68,12 @@ export default class WebSocketAPI {
   }
 
   sendMessage(data) {
+    /*
+     * Sends a message to the socket.
+     *
+     * Args
+     *  data: object containing the data to send to the socket
+     */
     const payload = JSON.stringify({
       action: 'sendmessage',
       data
@@ -55,5 +81,9 @@ export default class WebSocketAPI {
     console.log("Sending message", payload);
     this.ws.send(payload);
   }
+
+  /*
+   * Send a message after the user has stopped updating.
+   */
   lazySendMessage = debounce(this.sendMessage, 500);
 }
